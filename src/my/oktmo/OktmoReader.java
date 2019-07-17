@@ -8,15 +8,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class OktmoReader {
-
-/*    private String clearStr(String... dirtyString) {
-        if (dirtyString.length > 1) {
-            ArrayList<String> returnable = new ArrayList<>();
-        }
-        return dirtyString.replace("\"","");
-        return
-    }*/
-
     private String replaceLimiter = "\"";
     private String replaceOn = "";
 
@@ -65,14 +56,12 @@ public class OktmoReader {
 
                     Place place = new Place(Long.parseLong(code), status, name);
                     data.addPlace(place);
+                    data.addStatus(status);
 //                    System.out.println(place);
                 }
 
 
-
-
-
-                if (lineCount==20) break; // пример частичного чтения первых 20 строк
+//                if (lineCount==20) break; // пример частичного чтения первых 20 строк
 
             }
 //            System.out.println();

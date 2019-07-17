@@ -17,6 +17,7 @@ public class OktmoMain {
         OktmoReader reader = new OktmoReader();
         reader.readPlaces(filename, encoding, data);
         data.print();
+        data.getPlaceByIndex(10);
 
     }
 

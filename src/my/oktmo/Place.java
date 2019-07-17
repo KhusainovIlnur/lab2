@@ -1,5 +1,7 @@
 package my.oktmo;
 
+import java.util.HashSet;
+
 public class Place {
   private long code;
   private String status;
@@ -9,6 +11,18 @@ public class Place {
     this.code = code;
     this.status = status;
     this.name = name;
+  }
+
+  public long getCode() {
+    return code;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public String getName() {
+    return name;
   }
 
   @Override
