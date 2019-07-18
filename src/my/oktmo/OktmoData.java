@@ -6,7 +6,7 @@ import java.util.HashSet;
 public class OktmoData {
     private ArrayList<Place> places= new ArrayList();
     private HashSet<String> allStatuses = new HashSet<>();
-
+    private ArrayList<Place> sortedPlaces;
 
     public void addPlace(Place place) {
         places.add(place);
@@ -15,6 +15,12 @@ public class OktmoData {
     public void print() {
         for (Place p: places) {
             System.out.println(p);
+        }
+    }
+
+    public void printStatuses() {
+        for (String i: allStatuses) {
+            System.out.println(i);
         }
     }
 
@@ -36,5 +42,11 @@ public class OktmoData {
 
     public int getCountOfNP(int index) {
         return places.indexOf(getPlaceByIndex(index)) + 1;
+    }
+
+    public ArrayList<Place> sortByName() {
+        sortedPlaces = new ArrayList<>(places);
+        sortedPlaces.sort(new NameComp());
+        return sortedPlaces;
     }
 }
