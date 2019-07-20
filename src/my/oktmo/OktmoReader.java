@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class OktmoReader {
     private String replaceLimiter = "\"";
@@ -26,7 +28,6 @@ public class OktmoReader {
             br.readLine();
 
             String s;
-//            ArrayList<String> splitStr = new ArrayList<String>();
             String[] splitStr;
             String code, name, status;
             while ((s=br.readLine()) !=null ) { // пока readLine() возвращает не null
@@ -60,9 +61,7 @@ public class OktmoReader {
 //                    System.out.println(place);
                 }
 
-
 //                if (lineCount==20) break; // пример частичного чтения первых 20 строк
-
             }
 //            System.out.println();
         }
@@ -70,7 +69,67 @@ public class OktmoReader {
             System.out.println("Reading error in line "+lineCount);
             ex.printStackTrace();
         }
+    }
 
-}
+    public void regExpReader(String filename, String encoding, OktmoData data) {
+        int lineCount=0;
+        try (
+                BufferedReader br = new BufferedReader(
+                        new InputStreamReader(
+                                new FileInputStream(filename),
+                                encoding
+                        )
+                )
+        )
+        {
+            // пропуск первых двух ненужных строк
+            br.readLine();
+            br.readLine();
+
+            String s;
+
+            String  // 1 столбец
+                    c1 = "\"(\\d{2})\";",
+                    // 2 столбец
+                    c2 = "\"(\\d{3})\";",
+                    // 3 столбец
+                    c3 = "\"(\\d{3})\";",
+                    // 4 столбец
+                    c4 = "\"(\\d{3})\";",
+                    // 5 столбец
+                    c5 = "\"(\\d{1})\";",
+                    // 6 столбец
+                    c6 = "\"(2)\";",
+                    // 7 столбец, название населенного пункта, вместе со статусом, используется негативное заглядывание вперед
+                    c7 = "\"(?!Населенные пункты)(.*?) (.+?)\";";
+
+            String regexp = "^" + c1 + c2 + c3 + c4 + c5 + c6 + c7 + ".*";
+            Pattern p = Pattern.compile(regexp, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+//            Pattern p = Pattern.compile("^\"(\\d{2})\";\"(\\d{3})\";\"(\\d{3})\";\"(\\d{3})\";\"(\\d{1})\";\"(2)\";\"(?!Населенные пункты)(.*?) (.+?)\";.*", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+            Matcher m;
+            String code, name, status;
+
+            while ((s=br.readLine()) !=null ) { // пока readLine() возвращает не null
+                lineCount++;
+                m = p.matcher(s);
+                if (m.find()) {
+                    code = m.group(1) + m.group(2) + m.group(3) + m.group(4);
+                    status = m.group(7);
+                    name = m.group(8);
+
+                    Place place = new Place(Long.parseLong(code), status, name);
+                    data.addPlace(place);
+                    data.addStatus(status);
+                }
+
+//                if (lineCount==20) break; // пример частичного чтения первых 20 строк
+            }
+        }
+        catch (IOException ex) {
+            System.out.println("Reading error in line "+lineCount);
+            ex.printStackTrace();
+        }
+    }
+
  
 }

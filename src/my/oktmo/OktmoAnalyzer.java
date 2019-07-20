@@ -36,6 +36,3 @@ public class OktmoAnalyzer {
         return result;
     }
 }
-
-//  ^([^аоиеёуэюяыАОИЕЁУЭЮЯЫ])$
-//  Pattern.compile("^([^аоиеёуэюяы]){1}\\w+\\1$", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS).matcher("Витязев").find()
