@@ -19,11 +19,12 @@ public class OktmoMain {
         reader.readPlaces(filename, encoding, data);
 //        data.print();
 //        data.printStatuses();
-        ArrayList<Place> sorted = data.sortByName();
-        for (Place p: sorted) {
-            System.out.println(p);
-        }
-
+//        ArrayList<Place> sorted = data.sortByName();
+//        for (Place p: sorted) {
+//            System.out.println(p);
+//        }
+        OktmoAnalyzer analyzer = new OktmoAnalyzer(data);
+        ArrayList<Place> res1 = analyzer.reg2();
     }
 
 }

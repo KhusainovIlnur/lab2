@@ -49,4 +49,8 @@ public class OktmoData {
         sortedPlaces.sort(new NameComp());
         return sortedPlaces;
     }
+
+    public ArrayList<Place> getPlaces() {
+        return places;
+    }
 }
