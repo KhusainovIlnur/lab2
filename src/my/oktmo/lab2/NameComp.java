@@ -1,4 +1,4 @@
-package my.oktmo;
+package my.oktmo.lab2;
 
 import java.util.Comparator;
 

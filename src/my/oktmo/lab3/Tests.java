@@ -1,4 +1,4 @@
-package my.oktmo;
+package my.oktmo.lab3;
 
 import org.junit.Assert;
 import org.junit.Before;
