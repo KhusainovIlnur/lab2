@@ -26,7 +26,22 @@ public class Place {
   }
 
   @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+
+    Place that = (Place) obj;
+    return code == that.code && status.equals(that.status) && name.equals(that.name);
+  }
+
+  @Override
+  public int hashCode() {
+    return Long.hashCode(code);
+  }
+
+  @Override
   public String toString() {
     return code + " " + status + " " + name;
   }
+
 }

@@ -53,4 +53,26 @@ public class OktmoData {
     public ArrayList<Place> getPlaces() {
         return places;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        OktmoData that = (OktmoData) obj;
+//        return places.containsAll(that.places) && allStatuses.containsAll(that.allStatuses);
+//        return this.places.equals(that.places);
+        for (int i = 0; i < this.places.size(); i++) {
+            if ( ! this.places.get(i).equals(that.places.get(i))) { // в 3915-3918 строке были кавычки в названии, убрали
+                return false;
+            }
+        }
+        return true;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return places.hashCode() + allStatuses.hashCode();
+    }
 }

@@ -7,16 +7,18 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class Tests {
-    private OktmoData data;
+    private OktmoData data, data2;
 
     @Before
     public void setUp() throws Exception {
         String filename = "data-201710.csv",
                 encoding = "cp1251";
         data = new OktmoData();
+        data2 = new OktmoData();
 
         OktmoReader testReader = new OktmoReader();
         testReader.readPlaces(filename, encoding, data);
+        testReader.regExpReader(filename, encoding, data2);
     }
 
     @Test
@@ -31,5 +33,11 @@ public class Tests {
         assertEquals("Name= ", "Биробиджан", data.getPlaceByIndex(-1).getName());
         assertEquals("Count of NP= ", 155873, data.getCountOfNP(-1));
 
+    }
+
+    @Test
+    public void equalsTest() {
+        assertEquals(data.getPlaceByIndex(1), data2.getPlaceByIndex(1));
+        assertEquals(data, data2);
     }
 }
