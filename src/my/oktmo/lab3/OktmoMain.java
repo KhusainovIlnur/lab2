@@ -20,23 +20,23 @@ public class OktmoMain {
         OktmoData data2 = new OktmoData();
         OktmoReader reader = new OktmoReader();
 
-        reader.readPlaces(filename, encoding, data); // Балезино-3 не считывается, нет статуса, 193887 строка, добавили в csv-файл статус
-        reader.regExpReader(filename, encoding, data2); // с регулярками чтение быстрее
+        reader.readPlaces(filename, encoding, data);
+/*        reader.regExpReader(filename, encoding, data2); // с регулярками чтение быстрее
 
         long timeSpent = System.currentTimeMillis() - startTime;
         System.out.println("программа выполнялась " + timeSpent + " миллисекунд");
 
 
-/*        data.print();
-        data.printStatuses();
-        ArrayList<Place> sorted = data.sortByName();
-        for (Place p: sorted) {
-            System.out.println(p);
-        }*/
+//        data.print();
+//        data.printStatuses();
+//        ArrayList<Place> sorted = data.sortByName();
+//        for (Place p: sorted) {
+//            System.out.println(p);
+//        }
 
         OktmoAnalyzer analyzer = new OktmoAnalyzer(data);
         ArrayList<Place> res1 = analyzer.reg1();
-        ArrayList<Place> res2 = analyzer.reg2();
+        ArrayList<Place> res2 = analyzer.reg2();*/
 
     }
 

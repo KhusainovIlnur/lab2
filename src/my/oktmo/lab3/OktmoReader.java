@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,54 +20,109 @@ public class OktmoReader {
                                 encoding
                         )
                 )
-        ) {
-            // пропуск первых двух ненужных строк
-            br.readLine();
-            br.readLine();
+        )
+        {
+/*            ArrayList<String> ignoreStrStartWith = new ArrayList<>(Arrays.asList(
+                    "Раздел 1. Муниципальные образования",
+                    "Раздел 2. Населенные пункты",
+                    "Населенные пункты, входящие в состав",
+                    "Городские поселения",
+                    "Межселенные территории"
+            ));*/
+
+            String ignoreStrStartWith = "" +  // для удобства начато с новой строки
+                    "Раздел 1. Муниципальные образования" + "|" +
+                    "Раздел 2. Населенные пункты" + "|" +
+                    "Муниципальные районы" + "|" +
+                    "Населенные пункты, входящие в состав" + "|" +
+                    "Сельские поселения" + "|" +
+                    "Городские поселения" + "|" +
+                    "Межселенные территории";
+
+            String  regionPattern = "^" +  // начало регулярного выражения
+                                    // 1 столбец
+                    "\"(\\d{2})\";" +
+                                    // 2 столбец, признак региона
+                    "\"(000)\";"    +
+                                    // 3 столбец, признак региона
+                    "\"(000)\";"    +
+                                    // 4 столбец, признак региона
+                    "\"(000)\";"    +
+                                    // 5 столбец
+                    "\"(\\d{1})\";" +
+                                    // 6 столбец
+                    "\"(\\d{1})\";" +
+                                    // 7 столбец, название группы, весь столбец целиком, кроме строк в ignoreStrStartWith, используется негативное заглядывание вперед
+                    "\"(?!" + ignoreStrStartWith + ")(.*?)\";" +
+                                    // конец рег. выражения
+                    ".*";
+
+            String  rayonPattern = "^" +  // начало регулярного выражения
+                                    // 1 столбец
+                    "\"(\\d{2})\";" +
+                                    // 2 столбец
+                    "\"(\\d\\d[1-9])\";" +
+                                    // 3 столбец, признак района
+                    "\"(000)\";"    +
+                                    // 4 столбец, признак района
+                    "\"(000)\";"    +
+                                    // 5 столбец
+                    "\"(\\d{1})\";" +
+                                    // 6 столбец
+                    "\"(\\d{1})\";" +
+                                    // 7 столбец, название группы, весь столбец целиком, кроме строк в ignoreStrStartWith, используется негативное заглядывание вперед
+                    "\"(?!" + ignoreStrStartWith + ")(.*?)\";" +
+                                    // конец рег. выражения
+                    ".*";
+
+            String  selsovetPattern = "^" +  // начало регулярного выражения
+                    // 1 столбец
+                    "\"(\\d{2})\";" +
+                    // 2 столбец
+                    "\"(\\d{3})\";" +
+                    // 3 столбец
+                    "\"(\\d\\d[1-9])\";"    +
+                    // 4 столбец, признак сельсовета
+                    "\"(000)\";"    +
+                    // 5 столбец
+                    "\"(\\d{1})\";" +
+                    // 6 столбец
+                    "\"(\\d{1})\";" +
+                    // 7 столбец, название группы, весь столбец целиком, кроме строк в ignoreStrStartWith, используется негативное заглядывание вперед
+                    "\"(?!" + ignoreStrStartWith + ")(.*?)\";" +
+                    // конец рег. выражения
+                    ".*";
 
             String s;
-            String[] splitStr;
+            Pattern p = Pattern.compile(regionPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+            Matcher m;
             String code, name, status;
+
             while ((s=br.readLine()) !=null ) { // пока readLine() возвращает не null
                 lineCount++;
-
-                splitStr = s.split(";");
-                // индексы, которые необходимо очистить
-                int[] clearArray = {0, 1, 2, 3, 5, 6};
-                for (int i: clearArray) {
-                    splitStr[i] = splitStr[i].replace(replaceLimiter, replaceOn);
+                if (lineCount == 3) {
+                    System.out.println();
                 }
-
-                if (splitStr[5].equals("2") && ! splitStr[6].startsWith("Населенные пункты") ) {
-
-                    code = splitStr[0] + splitStr[1] + splitStr[2] + splitStr[3];
-                    Long.parseLong(code);
-
-                    if (splitStr[6].indexOf(" ") != -1) {
-                        int split = splitStr[6].indexOf(" ");
-                        status = splitStr[6].substring(0, split);
-                        name = splitStr[6].substring(split + 1);
-                    }
-                    else {
-                        status = "undefined";
-                        name = splitStr[6];
-                    }
-
-                    Place place = new Place(Long.parseLong(code), status, name);
-                    data.addPlace(place);
-                    data.addStatus(status);
-//                    System.out.println(place);
+                m = p.matcher(s);
+                if (m.find()) {
+                    System.out.println(s);
+                    code = m.group(1) + m.group(2) + m.group(3) + m.group(4);
+                    status = "";
+                    name = "";
                 }
 
 //                if (lineCount==20) break; // пример частичного чтения первых 20 строк
             }
-//            System.out.println();
+            System.out.println();
         }
         catch (IOException ex) {
             System.out.println("Reading error in line "+lineCount);
             ex.printStackTrace();
         }
     }
+
+//  Pattern.compile("\"(?!Раздел 1. Муниципальные образования|Раздел 2. Населенные пункты|Населенные пункты, входящие в состав|Городские поселения|Межселенные территории)(.*?)\";", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS).matcher("\"Раздел 1. Муниципальные образования субъектов Российской Федерации\";").find()
+//  Pattern.compile("\"(?!Раздел 1. Муниципальные образования|Раздел 2. Населенные пункты|Населенные пункты, входящие в состав|Городские поселения|Межселенные территории)(.*?)\";", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS).matcher("\"Муниципальные образования Алтайского края\";").find()
 
     public void regExpReader(String filename, String encoding, OktmoData data) {
         int lineCount=0;

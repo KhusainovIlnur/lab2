@@ -1,6 +1,5 @@
 package my.oktmo.lab3;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,4 +39,5 @@ public class Tests {
         assertEquals(data.getPlaceByIndex(1), data2.getPlaceByIndex(1));
         assertEquals(data, data2);
     }
+
 }
