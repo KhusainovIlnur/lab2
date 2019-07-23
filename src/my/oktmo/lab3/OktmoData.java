@@ -1,10 +1,12 @@
 package my.oktmo.lab3;
 
+import javax.print.attribute.HashAttributeSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class OktmoData {
-    private ArrayList<Place> places= new ArrayList();
+/*    private ArrayList<Place> places= new ArrayList();
     private HashSet<String> allStatuses = new HashSet<>();
     private ArrayList<Place> sortedPlaces;
 
@@ -74,5 +76,16 @@ public class OktmoData {
     @Override
     public int hashCode() {
         return places.hashCode() + allStatuses.hashCode();
+    }*/
+
+    private HashMap<Long, OKTMOGroup> dataMap = new HashMap<>();
+
+    public void addGroup(OKTMOGroup oktmoGroup) {
+        dataMap.put(oktmoGroup.getCode(), oktmoGroup);
+
+    }
+
+    public HashMap<Long, OKTMOGroup> getDataMap() {
+        return dataMap;
     }
 }

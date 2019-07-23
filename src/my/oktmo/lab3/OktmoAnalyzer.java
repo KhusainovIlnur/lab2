@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class OktmoAnalyzer {
+    /*
     private OktmoData data;
     private ArrayList<Place> result = new ArrayList<>();
 
@@ -35,4 +36,6 @@ public class OktmoAnalyzer {
         }
         return result;
     }
+*/
+
 }

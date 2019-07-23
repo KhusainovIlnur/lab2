@@ -4,13 +4,20 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class OktmoReader {
     private String replaceLimiter = "\"";
     private String replaceOn = "";
 
+/*
     public void readPlaces(String filename, String encoding, OktmoData data) {
         int lineCount=0;
         try (
@@ -22,14 +29,6 @@ public class OktmoReader {
                 )
         )
         {
-/*            ArrayList<String> ignoreStrStartWith = new ArrayList<>(Arrays.asList(
-                    "Раздел 1. Муниципальные образования",
-                    "Раздел 2. Населенные пункты",
-                    "Населенные пункты, входящие в состав",
-                    "Городские поселения",
-                    "Межселенные территории"
-            ));*/
-
             String ignoreStrStartWith = "" +  // для удобства начато с новой строки
                     "Раздел 1. Муниципальные образования" + "|" +
                     "Раздел 2. Населенные пункты" + "|" +
@@ -93,16 +92,13 @@ public class OktmoReader {
                     // конец рег. выражения
                     ".*";
 
-            String s;
             Pattern p = Pattern.compile(regionPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
             Matcher m;
             String code, name, status;
 
+
             while ((s=br.readLine()) !=null ) { // пока readLine() возвращает не null
                 lineCount++;
-                if (lineCount == 3) {
-                    System.out.println();
-                }
                 m = p.matcher(s);
                 if (m.find()) {
                     System.out.println(s);
@@ -121,9 +117,140 @@ public class OktmoReader {
         }
     }
 
-//  Pattern.compile("\"(?!Раздел 1. Муниципальные образования|Раздел 2. Населенные пункты|Населенные пункты, входящие в состав|Городские поселения|Межселенные территории)(.*?)\";", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS).matcher("\"Раздел 1. Муниципальные образования субъектов Российской Федерации\";").find()
-//  Pattern.compile("\"(?!Раздел 1. Муниципальные образования|Раздел 2. Населенные пункты|Населенные пункты, входящие в состав|Городские поселения|Межселенные территории)(.*?)\";", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS).matcher("\"Муниципальные образования Алтайского края\";").find()
+*/
 
+
+    public void readPlacesFunconality(String filename, String encoding, OktmoData data) {
+
+        String ignoreStrStartWith = "" +  // для удобства начато с новой строки
+                "Раздел 1. Муниципальные образования" + "|" +
+                "Раздел 2. Населенные пункты" + "|" +
+                "Муниципальные районы" + "|" +
+                "Населенные пункты, входящие в состав" + "|" +
+                "Сельские поселения" + "|" +
+                "Городские поселения" + "|" +
+                "Межселенные территории";
+
+        String  regionPattern = "^" +  // начало регулярного выражения
+                // 1 столбец
+                "\"(\\d{2})\";" +
+                // 2 столбец, признак региона
+                "\"(000)\";"    +
+                // 3 столбец, признак региона
+                "\"(000)\";"    +
+                // 4 столбец, признак региона
+                "\"(000)\";"    +
+                // 5 столбец
+                "\"(\\d{1})\";" +
+                // 6 столбец
+                "\"(\\d{1})\";" +
+                // 7 столбец, название группы, весь столбец целиком, кроме строк в ignoreStrStartWith, используется негативное заглядывание вперед
+                "\"(?!" + ignoreStrStartWith + ")(.*?)\";" +
+                // конец рег. выражения
+                ".*";
+
+        String  rayonPattern = "^" +  // начало регулярного выражения
+                // 1 столбец
+                "\"(\\d{2})\";" +
+                // 2 столбец
+                "\"(\\d\\d[1-9])\";" +
+                // 3 столбец, признак района
+                "\"(000)\";"    +
+                // 4 столбец, признак района
+                "\"(000)\";"    +
+                // 5 столбец
+                "\"(\\d{1})\";" +
+                // 6 столбец
+                "\"(\\d{1})\";" +
+                // 7 столбец, название группы, весь столбец целиком, кроме строк в ignoreStrStartWith, используется негативное заглядывание вперед
+                "\"(?!" + ignoreStrStartWith + ")(.*?)\";" +
+                // конец рег. выражения
+                ".*";
+
+        String  selsovetPattern = "^" +  // начало регулярного выражения
+                // 1 столбец
+                "\"(\\d{2})\";" +
+                // 2 столбец
+                "\"(\\d{3})\";" +
+                // 3 столбец
+                "\"(\\d\\d[1-9])\";"    +
+                // 4 столбец, признак сельсовета
+                "\"(000)\";"    +
+                // 5 столбец
+                "\"(\\d{1})\";" +
+                // 6 столбец
+                "\"(\\d{1})\";" +
+                // 7 столбец, название группы, весь столбец целиком, кроме строк в ignoreStrStartWith, используется негативное заглядывание вперед
+                "\"(?!" + ignoreStrStartWith + ")(.*?)\";" +
+                // конец рег. выражения
+                ".*";
+
+
+//        Matcher m;
+
+/*
+        m = p.matcher(s);
+        if (m.find()) {
+            System.out.println(s);
+            code = m.group(1) + m.group(2) + m.group(3) + m.group(4);
+            status = "";
+            name = "";
+        }
+*/
+        try (Stream<String> stream = Files.lines(Paths.get(filename), Charset.forName(encoding))) {
+
+            stream
+                    .limit(20)
+                    .filter(x -> {
+                        String code, name;
+                        OKTMOLevel level, prevLevel;
+                        long prevCodeRayon = 0, prevCodeRegion;
+
+                        Pattern pRegion     = Pattern.compile(regionPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+                        Pattern pRayon      = Pattern.compile(rayonPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+                        Pattern pSelsovet   = Pattern.compile(selsovetPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+
+                        for (Pattern p: Arrays.asList(pSelsovet, pRayon, pRegion)) {
+                            Matcher m = p.matcher(x);
+                            if (m.find()) {
+                                code = m.group(1) + m.group(2) + m.group(3) + m.group(4);
+                                name = m.group(7);
+                                if (p == pSelsovet) {
+                                    level = OKTMOLevel.SELSOVET;
+                                    prevLevel = OKTMOLevel.RAYON;
+                                }
+                                else if (p == pRayon) {
+                                    level = OKTMOLevel.RAYON;
+                                    prevLevel = OKTMOLevel.REGION;
+                                    prevCodeRayon = Long.parseLong(code);
+                                }
+                                else {
+                                    level = OKTMOLevel.REGION;
+                                    prevLevel = null;
+                                    prevCodeRegion = Long.parseLong(code);
+                                }
+
+                                data.addGroup(
+                                    new OKTMOGroup(level, name, Long.parseLong(code))
+                                );
+                                data.getDataMap().get(prevCodeRayon);
+
+                                if (prevLevel != null) {}
+
+                                return true;
+                            }
+                        }
+
+
+                        return false;
+                    })
+                    .forEach(System.out::println);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+/*
     public void regExpReader(String filename, String encoding, OktmoData data) {
         int lineCount=0;
         try (
@@ -183,6 +310,6 @@ public class OktmoReader {
             ex.printStackTrace();
         }
     }
-
+*/
  
 }

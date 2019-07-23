@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class OktmoMain {
 
@@ -17,10 +18,10 @@ public class OktmoMain {
                encoding = "cp1251";
 
         OktmoData data = new OktmoData();
-        OktmoData data2 = new OktmoData();
         OktmoReader reader = new OktmoReader();
 
-        reader.readPlaces(filename, encoding, data);
+//        reader.readPlaces(filename, encoding, data);
+        reader.readPlacesFunconality(filename, encoding, data);
 /*        reader.regExpReader(filename, encoding, data2); // с регулярками чтение быстрее
 
         long timeSpent = System.currentTimeMillis() - startTime;
