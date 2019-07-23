@@ -88,4 +88,10 @@ public class OktmoData {
     public HashMap<Long, OKTMOGroup> getDataMap() {
         return dataMap;
     }
+
+    public void printMOinRB() {
+        for (OKTMOGroup og: dataMap.get(80000000000L).getOwnGroup()) {
+            System.out.println(og.getName());
+        }
+    }
 }

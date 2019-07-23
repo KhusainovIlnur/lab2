@@ -22,6 +22,7 @@ public class OktmoMain {
 
 //        reader.readPlaces(filename, encoding, data);
         reader.readPlacesFunconality(filename, encoding, data);
+        data.printMOinRB();
 /*        reader.regExpReader(filename, encoding, data2); // с регулярками чтение быстрее
 
         long timeSpent = System.currentTimeMillis() - startTime;

@@ -129,6 +129,7 @@ public class OktmoReader {
                 "Населенные пункты, входящие в состав" + "|" +
                 "Сельские поселения" + "|" +
                 "Городские поселения" + "|" +
+                "Городские округа" + "|" +
                 "Межселенные территории";
 
         String  regionPattern = "^" +  // начало регулярного выражения
@@ -152,8 +153,8 @@ public class OktmoReader {
         String  rayonPattern = "^" +  // начало регулярного выражения
                 // 1 столбец
                 "\"(\\d{2})\";" +
-                // 2 столбец
-                "\"(\\d\\d[1-9])\";" +
+                // 2 столбец, исключаем только значение 000
+                "\"(?!000)(\\d\\d\\d)\";" +
                 // 3 столбец, признак района
                 "\"(000)\";"    +
                 // 4 столбец, признак района
@@ -172,8 +173,8 @@ public class OktmoReader {
                 "\"(\\d{2})\";" +
                 // 2 столбец
                 "\"(\\d{3})\";" +
-                // 3 столбец
-                "\"(\\d\\d[1-9])\";"    +
+                // 3 столбец, исключаем только значение 000
+                "\"(?!000)(\\d\\d\\d)\";"    +
                 // 4 столбец, признак сельсовета
                 "\"(000)\";"    +
                 // 5 столбец
@@ -185,69 +186,69 @@ public class OktmoReader {
                 // конец рег. выражения
                 ".*";
 
+        int lineCount=0;
+        try (
+                BufferedReader br = new BufferedReader(
+                        new InputStreamReader(
+                                new FileInputStream(filename),
+                                encoding
+                        )
+                )
+        )
+        {
+            String code, name;
+            OKTMOLevel level, prevLevel;
+            OKTMOGroup oktmoGroup;
+            long prevSelsovetCode = -1, prevRayonCode = -1, prevRegionCode = -1;
 
-//        Matcher m;
+            Pattern pRegion     = Pattern.compile(regionPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+            Pattern pRayon      = Pattern.compile(rayonPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+            Pattern pSelsovet   = Pattern.compile(selsovetPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
 
-/*
-        m = p.matcher(s);
-        if (m.find()) {
-            System.out.println(s);
-            code = m.group(1) + m.group(2) + m.group(3) + m.group(4);
-            status = "";
-            name = "";
-        }
-*/
-        try (Stream<String> stream = Files.lines(Paths.get(filename), Charset.forName(encoding))) {
-
-            stream
-                    .limit(20)
-                    .filter(x -> {
-                        String code, name;
-                        OKTMOLevel level, prevLevel;
-                        long prevCodeRayon = 0, prevCodeRegion;
-
-                        Pattern pRegion     = Pattern.compile(regionPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
-                        Pattern pRayon      = Pattern.compile(rayonPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
-                        Pattern pSelsovet   = Pattern.compile(selsovetPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
-
-                        for (Pattern p: Arrays.asList(pSelsovet, pRayon, pRegion)) {
-                            Matcher m = p.matcher(x);
-                            if (m.find()) {
-                                code = m.group(1) + m.group(2) + m.group(3) + m.group(4);
-                                name = m.group(7);
-                                if (p == pSelsovet) {
-                                    level = OKTMOLevel.SELSOVET;
-                                    prevLevel = OKTMOLevel.RAYON;
-                                }
-                                else if (p == pRayon) {
-                                    level = OKTMOLevel.RAYON;
-                                    prevLevel = OKTMOLevel.REGION;
-                                    prevCodeRayon = Long.parseLong(code);
-                                }
-                                else {
-                                    level = OKTMOLevel.REGION;
-                                    prevLevel = null;
-                                    prevCodeRegion = Long.parseLong(code);
-                                }
-
-                                data.addGroup(
-                                    new OKTMOGroup(level, name, Long.parseLong(code))
-                                );
-                                data.getDataMap().get(prevCodeRayon);
-
-                                if (prevLevel != null) {}
-
-                                return true;
+            String s;
+            while ((s=br.readLine()) !=null ) { // пока readLine() возвращает не null
+                lineCount++;
+                for (Pattern p: Arrays.asList(pSelsovet, pRayon, pRegion)) {
+                    Matcher m = p.matcher(s);
+                    if (m.find()) {
+                        code = m.group(1) + m.group(2) + m.group(3) + m.group(4);
+                        name = m.group(7);
+                        if (p == pSelsovet) {
+                            level = OKTMOLevel.SELSOVET;
+                            prevSelsovetCode = Long.parseLong(code);
+                            oktmoGroup = new OKTMOGroup(level, name, Long.parseLong(code));
+                            data.addGroup(oktmoGroup);
+                            if (prevRayonCode != -1) {
+                                data.getDataMap().get(prevRayonCode).addGroupOwnGroup(oktmoGroup);
                             }
+
                         }
+                        else if (p == pRayon) {
+                            level = OKTMOLevel.RAYON;
+                            prevRayonCode = Long.parseLong(code);
+                            oktmoGroup = new OKTMOGroup(level, name, Long.parseLong(code));
+                            data.addGroup(oktmoGroup);
+                            if (prevRegionCode != -1) {
+                                data.getDataMap().get(prevRegionCode).addGroupOwnGroup(oktmoGroup);
+                            }
 
+                        }
+                        else {
+                            level = OKTMOLevel.REGION;
+                            prevRegionCode = Long.parseLong(code);
+                            oktmoGroup = new OKTMOGroup(level, name, Long.parseLong(code));
+                            data.addGroup(oktmoGroup);
+                        }
+                    }
+//                    if (lineCount==19)
+//                        System.out.println();
+                }
+//                if (lineCount==20) break; // пример частичного чтения первых 20 строк
+            }
 
-                        return false;
-                    })
-                    .forEach(System.out::println);
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            System.out.println("Reading error in line "+lineCount);
+            ex.printStackTrace();
         }
     }
 /*
