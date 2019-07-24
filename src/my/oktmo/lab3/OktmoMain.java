@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class OktmoMain {
 
@@ -21,8 +22,18 @@ public class OktmoMain {
         OktmoReader reader = new OktmoReader();
 
         reader.readPlacesFunconality(filename, encoding, data);
-        data.printMOinRB();
+        OktmoAnalyzer analyzer = new OktmoAnalyzer();
 
+        OKTMOGroup
+                aksSelsovet = new OKTMOGroup(OKTMOLevel.SELSOVET, "Аксеновский сельсовет", 80602406000L),
+                alshRayon   = new OKTMOGroup(OKTMOLevel.RAYON, "Альшеевский муниципальный район", 80602000000L),
+                rbRegion    = new OKTMOGroup(OKTMOLevel.REGION, "Муниципальные образования Республики Башкортостан", 80000000000L);
+
+        List<Place> resS = analyzer.findAllPlacesInGroup(aksSelsovet, data);
+        List<Place> resRayon = analyzer.findAllPlacesInGroup(alshRayon, data);
+        List<Place> resRegion = analyzer.findAllPlacesInGroup(rbRegion, data);
+
+        data.printMOinRB();
 
     }
 

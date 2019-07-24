@@ -1,11 +1,9 @@
 package my.oktmo.lab3;
 
-import javax.print.attribute.HashAttributeSet;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.TreeMap;
+
 
 public class OktmoData {
 /*    private ArrayList<Place> places= new ArrayList();
@@ -80,14 +78,20 @@ public class OktmoData {
         return places.hashCode() + allStatuses.hashCode();
     }*/
 
-    private HashMap<Long, OKTMOGroup> dataMap = new HashMap<>();
+//    private HashMap<Long, OKTMOGroup> dataMap = new HashMap<>();
+    private TreeMap<Long, OKTMOGroup> dataMap = new TreeMap<>(new Comparator<Long>() {
+        @Override
+        public int compare(Long o1, Long o2) {
+            return o1.compareTo(o2);
+        }
+    });
 
     public void addGroup(OKTMOGroup oktmoGroup) {
         dataMap.put(oktmoGroup.getCode(), oktmoGroup);
 
     }
 
-    public HashMap<Long, OKTMOGroup> getDataMap() {
+    public TreeMap<Long, OKTMOGroup> getDataMap() {
         return dataMap;
     }
 
@@ -101,13 +105,5 @@ public class OktmoData {
 
     public int getCountSelsovetInRBRayon(long code) {
         return  dataMap.get(80000000000L).getOwnGroup().stream().filter(og -> og.getCode() == code).limit(1).mapToInt(og -> og.getOwnGroup().size()).sum();
-/*
-        for (OKTMOGroup og: dataMap.get(80000000000L).getOwnGroup()) {
-            if (og.getCode() == code) {
-                return og.getOwnGroup().size();
-            }
-        }
-        return 0;
-*/
     }
 }

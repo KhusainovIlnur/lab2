@@ -1,5 +1,6 @@
 package my.oktmo.lab3;
 
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -186,6 +187,25 @@ public class OktmoReader {
                 // конец рег. выражения
                 ".*";
 
+        String  npPattern = "^" +  // начало регулярного выражения
+                // 1 столбец
+                "\"(\\d{2})\";" +
+                // 2 столбец
+                "\"(\\d{3})\";" +
+                // 3 столбец
+                "\"(\\d{3})\";" +
+                // 4 столбец
+                "\"(\\d{3})\";" +
+                // 5 столбец
+                "\"(\\d{1})\";" +
+                // 6 столбец
+                "\"(2)\";" +
+                // 7 столбец, название населенного пункта, вместе со статусом, используется негативное заглядывание вперед
+                "\"(?!Населенные пункты)(.*?) (.+?)\";" +
+                // конец рег. выражения
+                ".*";
+
+
         int lineCount=0;
         try (
                 BufferedReader br = new BufferedReader(
@@ -196,7 +216,7 @@ public class OktmoReader {
                 )
         )
         {
-            String code, name;
+            String code, name, status;
             OKTMOLevel level, prevLevel;
             OKTMOGroup oktmoGroup;
             long prevSelsovetCode = -1, prevRayonCode = -1, prevRegionCode = -1;
@@ -204,16 +224,25 @@ public class OktmoReader {
             Pattern pRegion     = Pattern.compile(regionPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
             Pattern pRayon      = Pattern.compile(rayonPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
             Pattern pSelsovet   = Pattern.compile(selsovetPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
+            Pattern pNP         = Pattern.compile(npPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);
 
             String s;
             while ((s=br.readLine()) !=null ) { // пока readLine() возвращает не null
                 lineCount++;
-                for (Pattern p: Arrays.asList(pSelsovet, pRayon, pRegion)) {
+                for (Pattern p: Arrays.asList(pSelsovet, pRayon, pRegion, pNP)) {
                     Matcher m = p.matcher(s);
                     if (m.find()) {
                         code = m.group(1) + m.group(2) + m.group(3) + m.group(4);
                         name = m.group(7);
-                        if (p == pSelsovet) {
+                        if (p == pNP) {
+                            status = m.group(7);
+                            name = m.group(8);
+                            Place place = new Place(Long.parseLong(code), status, name);
+                            if (prevSelsovetCode != -1) {
+                                data.getDataMap().get(prevSelsovetCode).addPlace(place);
+                            }
+                        }
+                        else if (p == pSelsovet) {
                             level = OKTMOLevel.SELSOVET;
                             prevSelsovetCode = Long.parseLong(code);
                             oktmoGroup = new OKTMOGroup(level, name, Long.parseLong(code));
@@ -221,7 +250,6 @@ public class OktmoReader {
                             if (prevRayonCode != -1) {
                                 data.getDataMap().get(prevRayonCode).addGroupOwnGroup(oktmoGroup);
                             }
-
                         }
                         else if (p == pRayon) {
                             level = OKTMOLevel.RAYON;
@@ -231,7 +259,6 @@ public class OktmoReader {
                             if (prevRegionCode != -1) {
                                 data.getDataMap().get(prevRegionCode).addGroupOwnGroup(oktmoGroup);
                             }
-
                         }
                         else {
                             level = OKTMOLevel.REGION;
