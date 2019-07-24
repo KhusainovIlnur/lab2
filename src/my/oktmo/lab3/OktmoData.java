@@ -4,6 +4,8 @@ import javax.print.attribute.HashAttributeSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class OktmoData {
 /*    private ArrayList<Place> places= new ArrayList();
@@ -90,8 +92,22 @@ public class OktmoData {
     }
 
     public void printMOinRB() {
+        dataMap.get(80000000000L).getOwnGroup().forEach(og -> System.out.println(og.getName()));
+    }
+
+    public int getCountMOinRB() {
+        return dataMap.get(80000000000L).getOwnGroup().size();
+    }
+
+    public int getCountSelsovetInRBRayon(long code) {
+        return  dataMap.get(80000000000L).getOwnGroup().stream().filter(og -> og.getCode() == code).limit(1).mapToInt(og -> og.getOwnGroup().size()).sum();
+/*
         for (OKTMOGroup og: dataMap.get(80000000000L).getOwnGroup()) {
-            System.out.println(og.getName());
+            if (og.getCode() == code) {
+                return og.getOwnGroup().size();
+            }
         }
+        return 0;
+*/
     }
 }
