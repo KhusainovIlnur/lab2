@@ -2,6 +2,7 @@ package my.oktmo.lab3;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 
@@ -85,6 +86,16 @@ public class OktmoData {
             return o1.compareTo(o2);
         }
     });
+
+    private TreeMap<String, OKTMOGroup> nameObjMap = new TreeMap<>();
+
+    public OKTMOGroup getOktmoGroupByRegionName(String regionName) {
+        return nameObjMap.get(regionName);
+    }
+
+    public void addToNameObjMap(String name, OKTMOGroup oktmoGroup) {
+        nameObjMap.put(name, oktmoGroup);
+    }
 
     public void addGroup(OKTMOGroup oktmoGroup) {
         dataMap.put(oktmoGroup.getCode(), oktmoGroup);

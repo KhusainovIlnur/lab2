@@ -265,6 +265,7 @@ public class OktmoReader {
                             prevRegionCode = Long.parseLong(code);
                             oktmoGroup = new OKTMOGroup(level, name, Long.parseLong(code));
                             data.addGroup(oktmoGroup);
+                            data.addToNameObjMap(name, oktmoGroup);
                         }
                     }
 //                    if (lineCount==19)
